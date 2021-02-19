@@ -101,19 +101,24 @@ class Jackett(object):
 
         # todo what values are possible for imdb_id?
         movie_params = movie_search_caps["params"]
-        request_params = {
-            "t": "movie",
-            "apikey": self._api_key
-        }
 
         has_imdb_caps = 'imdbid' in movie_params
         log.debug("movie search; imdb_id=%s, has_imdb_caps=%s", imdb_id, has_imdb_caps)
         if imdb_id and has_imdb_caps:
-            request_params["imdbid"] = imdb_id
-        else:
-            request_params["q"] = title + u' ' + year
-            log.debug("searching movie with query=%s", request_params["q"])
-
+            request_params = {
+                "t": "movie",
+                "apikey": self._api_key,
+                "imdbid": imdb_id
+            }
+            results = self._do_search_request(request_params)
+            if results:
+                return results
+        request_params = {
+            "t": "movie",
+            "apikey": self._api_key,
+            "q": title + u' ' + year
+        }
+        log.debug("searching movie with query=%s", request_params["q"])
         return self._do_search_request(request_params)
 
     def search_shows(self, title, season=None, episode=None, imdb_id=None):
